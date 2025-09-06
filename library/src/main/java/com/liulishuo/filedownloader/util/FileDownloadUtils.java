@@ -23,6 +23,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.text.TextUtils;
@@ -45,8 +47,12 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -889,4 +895,43 @@ public class FileDownloadUtils {
         }
         return null;
     }
+
+    /**
+     * 通过 HEAD 请求批量获取 url 对应的文件大小（Content-Length）
+     * 纯 JDK 实现，无 OkHttp
+     */
+    public static void probeTotalSizeAsync(List<String> urls,
+                                           final ProbeCallback callback) {
+        PROBE_POOL.execute(() -> {
+            final Map<String, Long> map = new LinkedHashMap<>();
+            for (String url : urls) {
+                HttpURLConnection conn = null;
+                try {
+                    conn = (HttpURLConnection) new URL(url).openConnection();
+                    conn.setRequestMethod("HEAD");
+                    conn.setConnectTimeout(3000);
+                    conn.setReadTimeout(3000);
+                    conn.setRequestProperty("User-Agent", "FileDownloader/1.7.8-SNAPSHOT");
+                    long len = 0;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        len = conn.getContentLengthLong();
+                    }
+                    if (len <= 0) len = -1L;
+                    map.put(url, len);
+                } catch (IOException ignore) {
+                    map.put(url, -1L);
+                } finally {
+                    if (conn != null) conn.disconnect();
+                }
+            }
+            // 切回主线程
+            new Handler(Looper.getMainLooper()).post(() -> callback.onDone(map));
+        });
+    }
+    public interface ProbeCallback {
+        void onDone(Map<String, Long> urlSizeMap);
+    }
+    private static final ExecutorService PROBE_POOL =
+            Executors.newFixedThreadPool(4);
+
 }

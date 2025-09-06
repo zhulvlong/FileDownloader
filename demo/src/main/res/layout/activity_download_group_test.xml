@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/startDownA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="startDownA"
+            android:text="Group A Donw" />
+
+        <Button
+            android:id="@+id/pauseDownA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="pauseDownA"
+            android:text="Group A Pause" />
+
+        <Button
+            android:id="@+id/resumeDownA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="resumeDownA"
+            android:text="Group A resume" />
+
+        <Button
+            android:id="@+id/canceDownA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="canceDownA"
+            android:text="Group A cance" />
+
+        <TextView
+            android:id="@+id/consoleA"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/startDownB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="startDownB"
+            android:text="Group B Donw" />
+
+        <Button
+            android:id="@+id/pauseDownB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="pauseDownB"
+            android:text="Group B Pause" />
+
+        <Button
+            android:id="@+id/resumeDownB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="resumeDownB"
+            android:text="Group B resume" />
+
+        <Button
+            android:id="@+id/canceDownB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="canceDownB"
+            android:text="Group B cance" />
+
+        <TextView
+            android:id="@+id/consoleB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+</LinearLayout>

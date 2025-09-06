@@ -34,5 +34,10 @@
         android:onClick="onClickNotification"
         android:text="@string/notification_demo_title" />
 
+    <Button
+        style="@style/DemoButton"
+        android:onClick="onClickGroup"
+        android:text="@string/multitask_group_test_title" />
+
 
 </LinearLayout>

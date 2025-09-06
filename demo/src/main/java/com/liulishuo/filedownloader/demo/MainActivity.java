@@ -56,7 +56,9 @@ public class MainActivity extends AppCompatActivity {
     public void onClickNotification(final View view){
         startActivity(new Intent(this, NotificationSampleActivity.class));
     }
-
+    public void onClickGroup(View view) {
+        startActivity(new Intent(this, DownloadGroupManagerActivity.class));
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -89,4 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
         FileDownloadMonitor.releaseGlobalMonitor();
     }
+
+
 }

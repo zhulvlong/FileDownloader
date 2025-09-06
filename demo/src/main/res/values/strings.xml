@@ -50,5 +50,6 @@
 
     <!-- multitask test -->
     <string name="multitask_test_title">Multiple tasks test</string>
+    <string name="multitask_group_test_title">Multiple group tasks test</string>
 
 </resources>

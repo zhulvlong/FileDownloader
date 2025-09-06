@@ -1,14 +1,18 @@
 package com.liulishuo.filedownloader.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.liulishuo.filedownloader.BaseDownloadTask;
+import com.liulishuo.filedownloader.FileDownloadListener;
 import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
 import com.liulishuo.filedownloader.util.FileDownloadUtils;
@@ -20,6 +24,8 @@ import java.lang.ref.WeakReference;
  * Created by Jacksgong on 12/21/15.
  */
 public class SingleTaskTestActivity extends AppCompatActivity {
+
+    private BaseDownloadTask downloadTask1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +54,175 @@ public class SingleTaskTestActivity extends AppCompatActivity {
         startBtn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                downloadId1 = createDownloadTask(1).start();
+                        downloadTask1 = createDownloadTask(1);
+                downloadTask1.setListener(new FileDownloadSampleListener() {
+
+                    @Override
+                    protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                        super.pending(task, soFarBytes, totalBytes);
+                        Log.d("Download-pending", "Task 1: pending");
+                        ((ViewHolder) task.getTag()).updatePending(task);
+                    }
+
+                    @Override
+                    protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                        super.progress(task, soFarBytes, totalBytes);
+                        Log.d("Download-progress", "Task 1: task Id= " + task.getId() + ",soFarBytes = " + soFarBytes + ",totalBytes = " + totalBytes + ",Progress = " + ((float) soFarBytes * 100 / (float) totalBytes) + "%");
+                        ((ViewHolder) task.getTag()).updateProgress(soFarBytes, totalBytes,
+                                task.getSpeed());
+                    }
+
+                    @Override
+                    protected void error(BaseDownloadTask task, Throwable e) {
+                        super.error(task, e);
+                        Log.e("Download-error", "Task 1: Error - " + e.getMessage());
+                        ((ViewHolder) task.getTag()).updateError(e, task.getSpeed());
+                    }
+
+                    @Override
+                    protected void connected(BaseDownloadTask task, String etag, boolean isContinue, int soFarBytes, int totalBytes) {
+                        super.connected(task, etag, isContinue, soFarBytes, totalBytes);
+                        Log.d("Download-connected", "Task 1: connected");
+                        ((ViewHolder) task.getTag()).updateConnected(etag, task.getFilename());
+                    }
+
+                    @Override
+                    protected void paused(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                        super.paused(task, soFarBytes, totalBytes);
+                        Log.d("Download-paused", "Task 1: Paused");
+                        ((ViewHolder) task.getTag()).updatePaused(task.getSpeed());
+                    }
+
+                    @Override
+                    protected void completed(BaseDownloadTask task) {
+                        super.completed(task);
+                        Log.d("Download-completed", "Task 1: Completed" + ",save path:" + task.getPath());
+                        ((ViewHolder) task.getTag()).updateCompleted(task);
+                    }
+
+                    @Override
+                    protected void warn(BaseDownloadTask task) {
+                        super.warn(task);
+                        Log.d("Download-warn", "Task 1: warn");
+                        ((ViewHolder) task.getTag()).updateWarn();
+                    }
+                });
+                downloadId1 = downloadTask1.start();
+
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e("Download", "Task 2: run--------------------------");
+                        BaseDownloadTask downloadTask2 = createDownloadTask(1);
+                        downloadTask2.setListener(new FileDownloadListener() {
+
+                            @Override
+                            protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                                Log.d("Download-pending", "Task 2: pending");
+                                ((ViewHolder) task.getTag()).updatePending(task);
+                            }
+
+                            @Override
+                            protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                                Log.d("Download-progress", "Task 2: task Id= " + task.getId() + ",Progress = " + ((float) soFarBytes * 100 / (float) totalBytes) + "%");
+                                ((ViewHolder) task.getTag()).updateProgress(soFarBytes, totalBytes,
+                                        task.getSpeed());
+                            }
+
+                            @Override
+                            protected void error(BaseDownloadTask task, Throwable e) {
+                                Log.e("Download-error", "Task 2: Error - " + e.getMessage());
+                                ((ViewHolder) task.getTag()).updateError(e, task.getSpeed());
+                            }
+
+                            @Override
+                            protected void connected(BaseDownloadTask task, String etag, boolean isContinue, int soFarBytes, int totalBytes) {
+                                super.connected(task, etag, isContinue, soFarBytes, totalBytes);
+                                Log.d("Download-connected", "Task 2: connected");
+                                ((ViewHolder) task.getTag()).updateConnected(etag, task.getFilename());
+                            }
+
+                            @Override
+                            protected void paused(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                                Log.d("Download-paused", "Task 2: Paused");
+                                ((ViewHolder) task.getTag()).updatePaused(task.getSpeed());
+                            }
+
+                            @Override
+                            protected void completed(BaseDownloadTask task) {
+                                Log.d("Download-completed", "Task 2: Completed" + ",save path:" + task.getPath());
+                                ((ViewHolder) task.getTag()).updateCompleted(task);
+                            }
+
+                            @Override
+                            protected void warn(BaseDownloadTask task) {
+                                Log.d("Download-warn", "Task 2: warn");
+                                ((ViewHolder) task.getTag()).updateWarn();
+                            }
+                        });
+                        if (downloadTask1.equals(downloadTask2)) {
+                            Log.e("Download", "同一个对象--------------------------downloadTask1：id=" + downloadTask1.getId() + ",downloadTask2：id=" + downloadTask2.getId());
+                        } else {
+                            Log.e("Download", "不是同一个对象--------------------------downloadTask1：id=" + downloadTask1.getId() + ",downloadTask2：id=" + downloadTask2.getId());
+                        }
+                        downloadTask2.pause();
+
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                BaseDownloadTask downloadTask3 = createDownloadTask(1);
+                                downloadTask3.setListener(new FileDownloadListener() {
+
+                                    @Override
+                                    protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                                        Log.d("Download-pending", "Task 3: pending");
+                                        ((ViewHolder) task.getTag()).updatePending(task);
+                                    }
+
+                                    @Override
+                                    protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                                        Log.d("Download-progress", "Task 3: task Id= " + task.getId() + ",Progress = " + ((float) soFarBytes * 100 / (float) totalBytes) + "%");
+                                        ((ViewHolder) task.getTag()).updateProgress(soFarBytes, totalBytes,
+                                                task.getSpeed());
+                                    }
+
+                                    @Override
+                                    protected void error(BaseDownloadTask task, Throwable e) {
+                                        Log.e("Download-error", "Task 3: Error - " + e.getMessage());
+                                        ((ViewHolder) task.getTag()).updateError(e, task.getSpeed());
+                                    }
+
+                                    @Override
+                                    protected void connected(BaseDownloadTask task, String etag, boolean isContinue, int soFarBytes, int totalBytes) {
+                                        super.connected(task, etag, isContinue, soFarBytes, totalBytes);
+                                        Log.d("Download-connected", "Task 3: connected");
+                                        ((ViewHolder) task.getTag()).updateConnected(etag, task.getFilename());
+                                    }
+
+                                    @Override
+                                    protected void paused(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                                        Log.d("Download-paused", "Task 3: Paused");
+                                        ((ViewHolder) task.getTag()).updatePaused(task.getSpeed());
+                                    }
+
+                                    @Override
+                                    protected void completed(BaseDownloadTask task) {
+                                        Log.d("Download-completed", "Task 3: Completed" + ",save path:" + task.getPath());
+                                        ((ViewHolder) task.getTag()).updateCompleted(task);
+                                    }
+
+                                    @Override
+                                    protected void warn(BaseDownloadTask task) {
+                                        Log.d("Download-warn", "Task 3: warn");
+                                        ((ViewHolder) task.getTag()).updateWarn();
+                                    }
+                                });
+                                downloadTask3.start();
+                            }
+                        }, 5000);
+                    }
+                }, 1000);
             }
         });
 
@@ -186,52 +360,7 @@ public class SingleTaskTestActivity extends AppCompatActivity {
                 .setPath(path, isDir)
                 .setCallbackProgressTimes(300)
                 .setMinIntervalUpdateSpeed(400)
-                .setTag(tag)
-                .setListener(new FileDownloadSampleListener() {
-
-                    @Override
-                    protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                        super.pending(task, soFarBytes, totalBytes);
-                        ((ViewHolder) task.getTag()).updatePending(task);
-                    }
-
-                    @Override
-                    protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                        super.progress(task, soFarBytes, totalBytes);
-                        ((ViewHolder) task.getTag()).updateProgress(soFarBytes, totalBytes,
-                                task.getSpeed());
-                    }
-
-                    @Override
-                    protected void error(BaseDownloadTask task, Throwable e) {
-                        super.error(task, e);
-                        ((ViewHolder) task.getTag()).updateError(e, task.getSpeed());
-                    }
-
-                    @Override
-                    protected void connected(BaseDownloadTask task, String etag, boolean isContinue, int soFarBytes, int totalBytes) {
-                        super.connected(task, etag, isContinue, soFarBytes, totalBytes);
-                        ((ViewHolder) task.getTag()).updateConnected(etag, task.getFilename());
-                    }
-
-                    @Override
-                    protected void paused(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                        super.paused(task, soFarBytes, totalBytes);
-                        ((ViewHolder) task.getTag()).updatePaused(task.getSpeed());
-                    }
-
-                    @Override
-                    protected void completed(BaseDownloadTask task) {
-                        super.completed(task);
-                        ((ViewHolder) task.getTag()).updateCompleted(task);
-                    }
-
-                    @Override
-                    protected void warn(BaseDownloadTask task) {
-                        super.warn(task);
-                        ((ViewHolder) task.getTag()).updateWarn();
-                    }
-                });
+                .setTag(tag);
     }
 
     private static class ViewHolder {

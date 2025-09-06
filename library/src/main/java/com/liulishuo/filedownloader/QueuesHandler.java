@@ -115,6 +115,15 @@ class QueuesHandler implements IQueuesHandler {
         return mRunningSerialMap.get(attachKey) != null;
     }
 
+    /**
+     * 返回true表示：同一个 BaseDownloadTask 实例（url + savePath 相同）只要 start() 过一次就会进入 inUsing 状态；
+     * 下次再把它塞进 FileDownloadQueueSet 时，启动start下载时，框架发现列表里 存在 inUsing 任务，就会整批拒绝启动并抛出该日志。
+     * @param attachKey
+     * @param list
+     * @param listener
+     * @param isSerial
+     * @return
+     */
     private boolean onAssembledTasksToStart(int attachKey,
                                             final List<BaseDownloadTask.IRunningTask> list,
                                             final FileDownloadListener listener, boolean isSerial) {
